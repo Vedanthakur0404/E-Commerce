@@ -1,7 +1,7 @@
 import React from 'react'
 import Login from '../features/auth/components/Login'
 
-function Loginpage() {
+function LoginPage() {
   return (
     <div>
 
@@ -10,4 +10,4 @@ function Loginpage() {
   )
 }
 
-export default Loginpage
+export default LoginPage

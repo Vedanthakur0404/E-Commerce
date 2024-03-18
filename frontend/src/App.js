@@ -5,12 +5,14 @@ import ProductList from './features/product List/PoductList';
 import Navbar from './features/navbar/Navbar';
 import Home from './pages/Home';
 import Login from './features/auth/components/Login';
-import Loginpage from './pages/LoginPage';
+import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import Cart from './features/cart/Cart';
+import CartPage from './pages/CartPage';
 
 
 const router = createBrowserRouter([
@@ -24,7 +26,13 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element:<Loginpage></Loginpage>,
+    element:<LoginPage></LoginPage>,
+  },
+
+  // Only for testing
+  {
+    path: "/cart",
+    element:<CartPage></CartPage>,
   },
 ]);
 
