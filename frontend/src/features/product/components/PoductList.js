@@ -269,7 +269,9 @@ export default function ProductList() {
       setCategoriesList(temp_category_list)
     }
     else{
-      const temp_category_list =  categoriesList.filter((x)=> x!==option.value)
+      let index = temp_category_list.findIndex(el => el===option.value) 
+      temp_category_list.splice(index, 1)
+      // const temp_category_list =  categoriesList.filter((x)=> x!==option.value)
       setCategoriesList(temp_category_list)
     }
 
