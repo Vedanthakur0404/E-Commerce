@@ -4,12 +4,13 @@ import {fetchAllProducts, fetchByCategories} from './productAPI'
 const initialState = {
     products : [],
     status: 'idle',
+    max_length : 10
 }
 
 export const fetchAllProductsAsync = createAsyncThunk(
   'product/fetchAllProducts',
-  async () => {
-    const response = await fetchAllProducts();
+  async (page) => {
+    const response = await fetchAllProducts(page);
     // The value we return becomes the `fulfilled` action payload
     return response.data;
   }
@@ -17,8 +18,8 @@ export const fetchAllProductsAsync = createAsyncThunk(
 
 export const fetchByCategoriesAsync = createAsyncThunk(
   'product/fetchByCategories',
-  async(categories)=>{
-    const response = await fetchByCategories(categories)
+  async(param)=>{
+    const response = await fetchByCategories(param['categoriesList'], param['page'])
     return response.data
   }
 )
@@ -39,14 +40,16 @@ export const productSlice = createSlice({
         })
         .addCase(fetchAllProductsAsync.fulfilled, (state, action) => {
           state.status = 'idle';
-          state.products = action.payload;
+          state.products = action.payload['data'];
+          state.max_length = action.payload['maxlength']
         })
         .addCase(fetchByCategoriesAsync.pending, (state) => {
           state.status = 'loading';
         })
         .addCase(fetchByCategoriesAsync.fulfilled, (state, action) => {
           state.status = 'idle';
-          state.products = action.payload;
+          state.products = action.payload['data'];
+          state.max_length = action.payload['maxlength']
         })
     },
 })
