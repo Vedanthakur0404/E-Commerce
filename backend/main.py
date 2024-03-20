@@ -32,15 +32,19 @@ app.add_middleware(
 #     return response
 
 @app.get('/getalldata')
-def getDummyData():
-    response  = get_all_dummy_data_from_db()
-    return response
+def getDummyData(page):
+    response, maxlength  = get_all_dummy_data_from_db(page)
+    return {"data":response, "maxlength" : maxlength}
 
 @app.post('/getCategories')
-async def get_by_categories(categories:str):
-    myarr = categories.split(",")
-    response = get_by_categories_from_db(myarr)
-    return response
+async def get_by_categories(page:str , categories:str | None = None  ):
+    print(page)
+    if categories == None or categories == "" or categories == " ": 
+        response, maxlength = get_all_dummy_data_from_db(page=page)
+    else:
+        myarr = categories.split(",")
+        response, maxlength = get_by_categories_from_db(myarr, page)
+    return {"data":response, "maxlength" : maxlength}
 
 
 
