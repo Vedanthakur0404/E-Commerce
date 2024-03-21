@@ -11,15 +11,22 @@ export  function fetchAllProducts(page) {
   );
 }
 
-export  function fetchByCategories(categoriesList, page) {
+export  function fetchByCategories(categoriesList, page, brands) {
 
-  let my_data ={ 'categories' : categoriesList}
   return new Promise(async (resolve) => {
-
-    const response = await fetch(`http://localhost:3001/getCategories?categories=${categoriesList}&page=${page}`  , {method: "POST"})
+    const response = await fetch(`http://localhost:3001/getCategories?categories=${categoriesList}&page=${page}&brands=${brands}`  , {method: "POST"})
     const data = await response.json()
     resolve({data})
   }
   );
 }
 
+
+export function fetchProductById(id){
+  return new Promise(async (resolve) => {
+    console.log(id)
+    const response = await fetch('http://localhost:3001/getProduct/'+id, {method: "GET"} )
+    const data = await response.json()
+    resolve({data})
+  })
+}

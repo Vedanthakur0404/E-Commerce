@@ -5,7 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from db import (
     save_all_dummy_data_to_db,
     get_all_dummy_data_from_db,
-    get_by_categories_from_db
+    get_by_categories_from_db,
+    get_product_by_id_from_db
 )
 app = FastAPI()
 
@@ -36,15 +37,25 @@ def getDummyData(page):
     response, maxlength  = get_all_dummy_data_from_db(page)
     return {"data":response, "maxlength" : maxlength}
 
+@app.get('/getProduct/{id}')
+def getProductById(id):
+    id = int(id)
+    response = get_product_by_id_from_db(id)
+    print(response)
+    return response
+
 @app.post('/getCategories')
-async def get_by_categories(page:str , categories:str | None = None  ):
-    print(page)
+async def get_by_categories(page:str , categories:str | None = None, brands:str | None = None  ):
+    print(page, categories, brands)
     if categories == None or categories == "" or categories == " ": 
-        response, maxlength = get_all_dummy_data_from_db(page=page)
+        response= get_all_dummy_data_from_db(page=page)
     else:
-        myarr = categories.split(",")
-        response, maxlength = get_by_categories_from_db(myarr, page)
-    return {"data":response, "maxlength" : maxlength}
+        categories_list = categories.split(",")
+        brands_list = []
+        if(brands != None and brands != "" and brands != " " and brands != 'undefined'):
+            brands_list = brands.split(",")
+        response = get_by_categories_from_db(categories_list, page, brands_list)
+    return response
 
 
 
