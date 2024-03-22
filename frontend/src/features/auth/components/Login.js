@@ -1,23 +1,33 @@
-import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import {
+import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useForm } from "react-hook-form";
+// import {
 
-  increment,
-  
-  incrementAsync,
+//   increment,
 
-  selectCount,
-} from '../authSlice';
-import { Link } from 'react-router-dom';
+//   incrementAsync,
 
+//   selectCount,
+// } from '../authSlice';
+import { Link, Navigate } from "react-router-dom";
+import { checkUserAsync } from "../authSlice";
 
 export default function Login() {
-  const count = useSelector(selectCount);
+  const error = useSelector((state) => state.customer.error);
+  const user = useSelector((state) => state.customer.loggedInUser);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
   const dispatch = useDispatch();
 
   return (
     <>
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+      {user && <Navigate to="/" replace={true}></Navigate>}
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <img
             className="mx-auto h-10 w-auto"
@@ -30,9 +40,20 @@ export default function Login() {
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form className="space-y-6" action="#" method="POST">
+          <form
+            noValidate
+            className="space-y-6"
+            onSubmit={handleSubmit((data) => {
+              dispatch(
+                checkUserAsync({ email: data.email, password: data.password })
+              );
+            })}
+          >
             <div>
-              <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Email address
               </label>
               <div className="mt-2">
@@ -40,20 +61,34 @@ export default function Login() {
                   id="email"
                   name="email"
                   type="email"
-                  autoComplete="email"
-                  required
+                  {...register("email", {
+                    required: "email is required",
+                    pattern: {
+                      value: /\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b/gi,
+                      message: "email not valid",
+                    },
+                  })}
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
+                {errors.email && (
+                  <p className="text-red-500">{errors.email.message}</p>
+                )}
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
                   Password
                 </label>
                 <div className="text-sm">
-                  <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                  <a
+                    href="#"
+                    className="font-semibold text-indigo-600 hover:text-indigo-500"
+                  >
                     Forgot password?
                   </a>
                 </div>
@@ -63,10 +98,22 @@ export default function Login() {
                   id="password"
                   name="password"
                   type="password"
-                  autoComplete="current-password"
-                  required
+                  {...register("password", {
+                    required: "password cannot be empty",
+                    pattern: {
+                      value:
+                        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm,
+                      message: `- at least 8 characters\n
+                  - must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number\n
+                  - Can contain special characters `,
+                    },
+                  })}
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
+                {errors.password && (
+                  <p className="text-red-500">{errors.password.message}</p>
+                )}
+                {error && <p className="text-red-500">{error.message}</p>}
               </div>
             </div>
 
@@ -81,8 +128,11 @@ export default function Login() {
           </form>
 
           <p className="mt-10 text-center text-sm text-gray-500">
-            Not a member?{' '}
-            <Link to={'/signup'} className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+            Not a member?{" "}
+            <Link
+              to={"/signup"}
+              className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
+            >
               Create a account
             </Link>
           </p>

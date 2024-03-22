@@ -1,10 +1,15 @@
 import json
 import uuid
 import pymongo
+import uuid
+from model import customer
 
 client = pymongo.MongoClient('mongodb://localhost:27017')
 db = client['DummyProducts']
 collection = db['products']
+collection_customer = db['custombers']
+from pymongo.errors import DuplicateKeyError
+
 
 
 def save_all_dummy_data_to_db(arr):
@@ -106,4 +111,18 @@ def get_product_by_id_from_db(id):
     return data
 
 
-        
+def add_customer_from_db(userData):
+    id = str(uuid.uuid4())
+    collection_customer.create_index([("email", 1)], unique=True)
+    try:
+        collection_customer.insert_one({"email":userData.email, "password":userData.password, "id":id})
+        return userData
+    except DuplicateKeyError:
+        print("Error: Email already exists")
+        return None
+
+
+
+def get_user_from_db(userData):
+    ans = collection_customer.find_one({'email':userData.email, 'password':userData.password})
+    return ans

@@ -1,13 +1,17 @@
 from typing import List
 from fastapi import FastAPI
+from fastapi import Query
 from fastapi.middleware.cors import CORSMiddleware 
-
 from db import (
     save_all_dummy_data_to_db,
     get_all_dummy_data_from_db,
     get_by_categories_from_db,
-    get_product_by_id_from_db
+    get_product_by_id_from_db,
+    add_customer_from_db,
+    get_user_from_db
 )
+from model import customer
+
 app = FastAPI()
 
 origins = ['*']
@@ -57,6 +61,25 @@ async def get_by_categories(page:str , categories:str | None = None, brands:str 
         response = get_by_categories_from_db(categories_list, page, brands_list)
     return response
 
+@app.post('/users')
+async def add_customer(userData:customer):
+    print("okk", userData)
+    response = add_customer_from_db(userData)
+    if response:
+        return {'data':response, 'success':True}
+    return {'success':False}
+
+@app.post('/users/login')
+async def get_user(userData:customer):
+    print("okk", userData)
+    response = get_user_from_db(userData)
+    print("response is ", response)
+    if response != None:
+        response = customer(**response)
+        return {'data' : response, 'success':True}
+    else:
+        print("Not Found", response)
+    return {'success':False}
 
 
 if __name__ == '__main__':
