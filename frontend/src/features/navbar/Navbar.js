@@ -20,7 +20,7 @@ const navigation = [
 const userNavigation = [
   { name: "Your Profile", href: "#" },
   { name: "Settings", href: "#" },
-  { name: "Sign out", href: "#" },
+  { name: "Sign out", href: "/login" },
 ];
 
 function classNames(...classes) {
@@ -50,9 +50,9 @@ export default function Navbar({ children }) {
                     <div className="hidden md:block">
                       <div className="ml-10 flex items-baseline space-x-4">
                         {navigation.map((item) => (
-                          <a
+                          <Link
                             key={item.name}
-                            href={item.href}
+                            to={item.href}
                             className={classNames(
                               item.current
                                 ? "bg-gray-900 text-white"
@@ -62,7 +62,7 @@ export default function Navbar({ children }) {
                             aria-current={item.current ? "page" : undefined}
                           >
                             {item.name}
-                          </a>
+                          </Link>
                         ))}
                       </div>
                     </div>
@@ -112,6 +112,7 @@ export default function Navbar({ children }) {
                               <Menu.Item key={item.name}>
                                 {({ active }) => (
                                   <a
+
                                     href={item.href}
                                     className={classNames(
                                       active ? "bg-gray-100" : "",
