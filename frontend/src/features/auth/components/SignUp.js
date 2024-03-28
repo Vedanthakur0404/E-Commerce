@@ -9,7 +9,7 @@ function SignUp() {
   const {
     register,
     handleSubmit,
-    watch,
+
     formState: { errors },
   } = useForm();
   console.log("errors are", errors);
@@ -79,7 +79,7 @@ function SignUp() {
                 </label>
                 <div className="text-sm">
                   <a
-                    href="#"
+                    
                     className="font-semibold text-indigo-600 hover:text-indigo-500"
                   >
                     Forgot password?

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React  from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 // import {
@@ -19,7 +19,6 @@ export default function Login() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm();
   const dispatch = useDispatch();

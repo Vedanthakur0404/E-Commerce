@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { StarIcon } from '@heroicons/react/20/solid'
 import { RadioGroup } from '@headlessui/react'
-import { Link, useParams} from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams} from 'react-router-dom'
 import { useSelector, useDispatch } from "react-redux";
 import  {fetchProductByIdAsync } from '../productSlice';
-
+import { insertInCartsAsync } from '../../cart/cartSlice';
 
 
 
@@ -42,12 +42,22 @@ export default function ProductDetail() {
   const product = useSelector((state) => state.product.SelectedProduct);
   const [selectedColor, setSelectedColor] = useState(colors[0])
   const [selectedSize, setSelectedSize] = useState(sizes[2])
-
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.customer.loggedInUser);
   useEffect(() => {
     console.log("working??")
     dispatch(fetchProductByIdAsync(params.id))
   }, [ dispatch, params.id])
   console.log("data is ------------------>", product)
+
+  const handleAddToCart = (id)=>{
+    
+    console.log("id of producty is ", id)
+    dispatch(insertInCartsAsync({'user_id':user['id'], 'prod_id':id}))
+    // useNavigate
+    navigate(`/cart/${id}`);
+    // return <useN to={`/cart/${id}`} replace={true}></useN>;
+  }
   
   // console.log(product)
   return (
@@ -248,9 +258,9 @@ export default function ProductDetail() {
               </div>
 
             <Link
-            to = '/cart'>
+            to = {`/cart/${product['id']}`}>
               <button
-             
+                onClick={()=>handleAddToCart(product['id'])}
                 type="submit"
                 className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >

@@ -6,7 +6,8 @@ const initialState = {
     status: 'idle',
     max_length : 10,
     brands : [],
-    SelectedProduct : null
+    SelectedProduct : null,
+    categories : []
 }
 
 export const fetchAllProductsAsync = createAsyncThunk(
@@ -21,7 +22,7 @@ export const fetchAllProductsAsync = createAsyncThunk(
 export const fetchProductByIdAsync = createAsyncThunk(
   'product/fetchProductById',
   async (id) => {
-    console.log(id)
+    // console.log(id)
     const response = await fetchProductById(id);
     // The value we return becomes the `fulfilled` action payload
     return response.data;
@@ -31,7 +32,9 @@ export const fetchProductByIdAsync = createAsyncThunk(
 export const fetchByCategoriesAsync = createAsyncThunk(
   'product/fetchByCategories',
   async(param)=>{
+    
     const response = await fetchByCategories(param['categoriesList'], param['page'], param['brands'])
+    // console.log(param)
     return response.data
   }
 )
@@ -64,6 +67,7 @@ export const productSlice = createSlice({
           state.products = action.payload['products'];
           state.max_length = action.payload['maxlength']
           state.brands = action.payload['brands'] 
+          state.categories = action.payload['category']
         })
         .addCase(fetchProductByIdAsync.pending, (state) => {
           state.status = 'loading';
