@@ -8,6 +8,8 @@ client = pymongo.MongoClient('mongodb://localhost:27017')
 db = client['DummyProducts']
 collection = db['products']
 collection_customer = db['custombers']
+collection_cart = db['cart']
+
 from pymongo.errors import DuplicateKeyError
 
 
@@ -97,12 +99,12 @@ def get_by_categories_from_db(categories_list, page, brands_list):
     all_categories = get_all_brands_from_db(categories_list)
     
     if len(products) < end:
-        data = {"products":products[start:], "maxlength":maxlength, "brands":all_categories}
+        data = {"products":products[start:], "maxlength":maxlength, "brands":all_categories, "category":categories_list}
 
         return data
     # all_categories = get_all_brands_from_db(products[start:end])
 
-    return {"products": products[start: end], "maxlength": maxlength, "brands":all_categories}
+    return {"products": products[start: end], "maxlength": maxlength, "brands":all_categories,  "category":categories_list}
 
 def get_product_by_id_from_db(id):
     product = collection.find_one({'id': id})
@@ -118,7 +120,7 @@ def add_customer_from_db(userData):
         collection_customer.insert_one({"email":userData.email, "password":userData.password, "id":id})
         return userData
     except DuplicateKeyError:
-        print("Error: Email already exists")
+        #print("Error: Email already exists")
         return None
 
 
@@ -126,3 +128,50 @@ def add_customer_from_db(userData):
 def get_user_from_db(userData):
     ans = collection_customer.find_one({'email':userData.email, 'password':userData.password})
     return ans
+
+def insert_address_in_db(user_id, address):
+    address.address_id = str(uuid.uuid4())
+    address_dict = address.dict()
+    collection_customer.update_one({"id": user_id},
+            {"$addToSet": {"address": address_dict}}
+            ,upsert=True
+            )
+    addressSet = collection_customer.find_one({"id": user_id}, {'address':1, '_id':0})
+    print(addressSet)
+    return address
+
+def get_address_from_db(user_id):
+    addressSet = collection_customer.find_one({"id": user_id}, {'address':1, '_id':0})
+    return addressSet
+
+def insert_product_in_cart(user_id, product_id):
+    product = get_product_by_id_from_db(product_id)
+    # print(['99999999999999', product])
+    data = collection_cart.find_one({'user_id' : user_id})
+    # data = 90
+    if data == None:
+        # print("ooooooooooooo")
+        cart = [product]
+        # print(product)
+        collection_cart.insert_one({'user_id':user_id, 'cart':cart})
+    else:
+        result = collection_cart.update_one(
+            {"user_id": user_id},
+            {"$push": {"cart": product}}
+            
+        )
+
+    return "Done"
+
+def get_product_from_cart(user_id):
+    ans =  collection_cart.find_one({'user_id':user_id})
+    # print(ans)
+    return ans["cart"]
+
+def remove_product_in_cart(user_id, prod_id):
+    collection_cart.update_one(
+         {"user_id": user_id},
+    {"$pull": {"cart": {"id": prod_id}}}
+    )
+    return get_product_from_cart(user_id)
+    

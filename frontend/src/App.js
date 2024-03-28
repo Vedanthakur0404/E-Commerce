@@ -1,9 +1,5 @@
-import React from 'react';
-import { Counter } from './features/counter/Counter';
-import './App.css';
-import Navbar from './features/navbar/Navbar';
+import React, { useEffect } from 'react';
 import Home from './pages/Home';
-import Login from './features/auth/components/Login';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import {
@@ -13,15 +9,17 @@ import {
 
 import CartPage from './pages/CartPage';
 import CheckOut from './features/checkOut/CheckOut';
-import ProductDetail from './features/product/components/ProductDetail';
 import ProductDetailPage from './pages/ProductDetailPage';
 import Protected from './features/auth/components/Protected';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectLoggedInUser } from './features/auth/authSlice';
+import CheckOutPage from './pages/CheckOutPage';
 
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Protected><Home></Home></Protected>,
+    element: <Protected><Home></Home></Protected>
   },
   {
     path: "/signup",
@@ -34,6 +32,12 @@ const router = createBrowserRouter([
 
   // Only for testing
   {
+    path: "/cart/:product_id",
+    element:  <Protected>
+      <CartPage></CartPage>
+      </Protected>,
+  },
+  {
     path: "/cart",
     element:  <Protected>
       <CartPage></CartPage>
@@ -41,8 +45,9 @@ const router = createBrowserRouter([
   },
   {
     path: "/checkout",
-    element: <Protected>  <CheckOut></CheckOut></Protected>,
+    element: <Protected>  <CheckOutPage></CheckOutPage></Protected>,
   },
+  
   {
     path: "/product-detail/:id",
     element: <Protected>  <ProductDetailPage></ProductDetailPage></Protected>,
@@ -50,6 +55,13 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const dispatch = useDispatch()
+  const user = useSelector((state) => state.customer.loggedInUser);
+  console.log(user)
+  // const user = useSelector(selectLoggedInUser)
+  // useEffect(()=>{
+  //   dispatch(fetchItemByUserIdAsync())
+  // },[])
   return (
 <RouterProvider router={router} />
   );

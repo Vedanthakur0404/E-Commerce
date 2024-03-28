@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { CheckUser, createUser, SheckUser } from "./authAPI";
+import { CheckUser, createUser } from "./authAPI";
 
 const initialState = {
   loggedInUser: null,
@@ -25,8 +25,8 @@ export const checkUserAsync = createAsyncThunk(
   }
 );
 
-export const counterSlice = createSlice({
-  name: "user",
+export const authSlice = createSlice({
+  name: "auth",
   initialState,
   reducers: {
     increment: (state) => {
@@ -61,9 +61,9 @@ export const counterSlice = createSlice({
   },
 });
 
-export const selectLoggedInUser = (state) => state.auth.loggedInUser;
-export const selectError = (state) => state.auth.error;
+// export const selectLoggedInUser = (state) => state.auth.loggedInUser;
+// export const selectError = (state) => state.auth.error;
 
-export const { increment } = counterSlice.actions;
+export const { increment } = authSlice.actions;
 
-export default counterSlice.reducer;
+export default authSlice.reducer;

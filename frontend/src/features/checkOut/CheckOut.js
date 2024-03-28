@@ -1,90 +1,186 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useSelector, useDispatch } from "react-redux";
-import { increment, incrementAsync, selectCount } from "./checkOutSlice";
+import { increment, incrementAsync } from "./checkOutSlice";
 import { Link } from "react-router-dom";
-
+import { getItemsFromCartAsync, removeItemsFromCartAsync } from "../cart/cartSlice";
+import { useForm } from "react-hook-form";
+import { addAddressAsync, getAddressAsync } from "./checkOutSlice";
 
 
 export default function CheckOut() {
-  const count = useSelector(selectCount);
-  const dispatch = useDispatch();
 
-  const products = [
-    {
-      id: 1,
-      name: "Throwback Hip Bag",
-      href: "#",
-      color: "Salmon",
-      price: "$90.00",
-      quantity: 1,
-      imageSrc:
-        "https://tailwindui.com/img/ecommerce-images/shopping-cart-page-04-product-01.jpg",
-      imageAlt:
-        "Salmon orange fabric pouch with match zipper, gray zipper pull, and adjustable hip belt.",
-    },
-    {
-      id: 2,
-      name: "Medium Stuff Satchel",
-      href: "#",
-      color: "Blue",
-      price: "$32.00",
-      quantity: 1,
-      imageSrc:
-        "https://tailwindui.com/img/ecommerce-images/shopping-cart-page-04-product-02.jpg",
-      imageAlt:
-        "Front of satchel with blue canvas body, black straps and handle, drawstring top, and front zipper pouch.",
-    },
-    // More products...
-  ];
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+    setValue,
+  } = useForm();
   
-  const address = [
-    {
-      name: 'Leslie Alexander',
-      street: '3rd pura',
-      city: 'Delhi',
-      pinCode:110001,
-      state:'Delhi',
-      phone: '1231231234',
-    },
-    {
-      name: 'Leslie Alexander',
-      street: '4rd pura',
-      city: 'Bangalore',
-      pinCode:110001,
-      state:'Karnataka',
-      phone: '1231231234',
-    },
-  ]
+  
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.customer.loggedInUser);
+  const cart = useSelector((state) => state.cart.cart)
+  const addressList = useSelector((state) => state.checkout.addressList)
+  const [selectedAddress, setSelectedAddress] = useState(null)
+  const [addressName, setAddressName] = useState('')
+  const [addressEmail, setAddressEmail] = useState('')
+  const [addressPhone, setAddressPhone] = useState('')
+  const [addressStreet, setAddressStreet] = useState('')
+  const [addressCity, setAddressCity] = useState('')
+  const [addressState, setAddressState] = useState('')
+  const [addressPinCode, setAddressPinCode] = useState('')
+  const [buttonController, setButtonController] = useState(0)
+
+
+  useEffect(()=>{
+    (dispatch(getItemsFromCartAsync(user['id'])))
+    dispatch(getAddressAsync(user['id']))
+  }, [dispatch, selectedAddress])
+
+  function handleRemoveButton(product_id){
+    dispatch(removeItemsFromCartAsync({'user_id':user['id'], 'prod_id':product_id}))
+  }
+
+  function handleSelectAddress(selectedAddress){
+    setButtonController(1)
+    console.log(selectedAddress)
+    setSelectedAddress(selectedAddress)
+    // setAddressEmail(selectedAddress['email'])
+    setValue("email", selectedAddress['email'])
+    // setAddressCity(selectedAddress['city'])
+    setValue("city", selectedAddress['city'])
+    // setAddressPhone(selectedAddress['phone'])
+    setValue("phone", selectedAddress['phone'])
+    // setAddressState(selectedAddress['state'])
+    setValue("state", selectedAddress['state'])
+    // setAddressStreet(selectedAddress['street'])
+    setValue("street", selectedAddress['street'])
+    // setAddressName(selectedAddress['name'])
+    setValue("name", selectedAddress['name'])
+    // setAddressPinCode(selectedAddress['pinCode'])
+    setValue("pinCode", selectedAddress['pinCode'])
+    console.log(addressCity, addressEmail,  addressPhone, addressState, addressPinCode)
+  }
+
+  function handleEmailChange(event){
+    if (buttonController === 1){
+      setButtonController(2)
+    }
+    console.log("value and type of email", event.target.value, typeof event.target.value)
+    setAddressEmail(event.target.value)
+  }
+
+  function handleNameChange(event){
+    if (buttonController === 1){
+      setButtonController(2)
+    }
+    console.log(event.target.value)
+    setAddressName(event.target.value)
+  }
+
+  function handleStateChange(event){
+    if (buttonController === 1){
+      setButtonController(2)
+    }
+    console.log(event.target.value)
+    setAddressState(event.target.value)
+  }
+
+  function handleCityChange(event){
+    if (buttonController === 1){
+      setButtonController(2)
+    }
+    console.log(event.target.value)
+    setAddressCity(event.target.value)
+  }
+
+  function handlePinCodeChange(event){
+    if (buttonController === 1){
+      setButtonController(2)
+    }
+    console.log(event.target.value)
+    setAddressPinCode(event.target.value)
+  }
+
+  function handlePhoneChange(event){
+    if (buttonController === 1){
+      setButtonController(2)
+    }
+    console.log(event.target.value)
+    setAddressPhone(event.target.value)
+  }
+
+  function handleStreetChange(event){
+    if (buttonController === 1){
+      setButtonController(2)
+    }
+    console.log(event.target.value)
+    // setAddressStreet(event.target.value)
+    setValue("street", event.target.value)
+  }
+
+
+  const products =cart
+  const total = cart.reduce((total, current) => {
+    return total + current.price;
+  }, 0);
+
+  const watchEmail = watch("email", false)
+
+  const address = addressList
   return (
     <>
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div className="grid pl-5 grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-5">
       <div className="lg:col-span-3">
-        <form className="bg-white px-5 mt-12">
+        <form className="bg-white px-5 mt-12" noValidate
+            onSubmit={handleSubmit((data) => {
+              console.log(typeof data['street'])
+              console.log("errors here ",errors)
+              dispatch(addAddressAsync({"userId":user['id'], 'address':data}))
+              reset();
+              setButtonController(0)
+              //   setAddressEmail("")
+              //   setAddressCity("")
+              //   setAddressPhone("")
+              //   setAddressState("")
+              //   setAddressStreet("")
+              //   setAddressName("")
+              //   setAddressPinCode("")
+              // console.log(errors)
+            })}>
         
         <div className="border-b border-gray-900/10 pb-12">
               <h2 className="text-2xl font-semibold leading-7 text-gray-900">Personal Information</h2>
               <p className="mt-1 text-sm leading-6 text-gray-600">Use a permanent address where you can receive mail.</p>
 
               <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                <div className="sm:col-span-3">
+                <div className="sm:col-span-4">
                   <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
-                    First name
+                    Full Name
                   </label>
                   <div className="mt-2">
                     <input
                       type="text"
+                      // value={addressName}
+                      // onChange={(event)=>handleNameChange(event)}
                       name="first-name"
                       id="first-name"
                       autoComplete="given-name"
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      {...register("name", {
+                        onChange: (e) => {handleNameChange(e)},
+                        required: "name is required",
+                      })}
                     />
                   </div>
                 </div>
 
-                <div className="sm:col-span-3">
+                {/* <div className="sm:col-span-3">
                   <label htmlFor="last-name" className="block text-sm font-medium leading-6 text-gray-900">
                     Last name
                   </label>
@@ -97,7 +193,7 @@ export default function CheckOut() {
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     />
                   </div>
-                </div>
+                </div> */}
 
                 <div className="sm:col-span-4">
                   <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
@@ -108,13 +204,23 @@ export default function CheckOut() {
                       id="email"
                       name="email"
                       type="email"
+                      // value={addressEmail}
+                      
                       autoComplete="email"
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      {...register("email", {
+                        onChange:(e)=> handleEmailChange(e),
+                        required: "email is required",
+                        pattern: {
+                          value: /\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b/gi,
+                          message: "email not valid",
+                        },
+                      })}
                     />
                   </div>
                 </div>
 
-                <div className="sm:col-span-3">
+                {/* <div className="sm:col-span-3">
                   <label htmlFor="country" className="block text-sm font-medium leading-6 text-gray-900">
                     Country
                   </label>
@@ -125,10 +231,41 @@ export default function CheckOut() {
                       autoComplete="country-name"
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                     >
+                      <option>India</option>
                       <option>United States</option>
                       <option>Canada</option>
                       <option>Mexico</option>
                     </select>
+                  </div>
+                </div> */}
+
+                <div className="sm:col-span-4">
+                  <label htmlFor="phone-number" className="block text-sm font-medium leading-6 text-gray-900">
+                    Phone Number
+                  </label>
+                  <div className="mt-2">
+                    <input
+                      type="text"
+                      name="phone-number"
+                      id="phone-number"
+                      // value = {addressPhone}
+                      autoComplete="phone-number"
+                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      {...register("phone", {
+                        onChange : (e)=>handlePhoneChange(e),
+                        // setValueAs: addressPhone ,
+                        required: "phone Number is required",
+                        pattern:{
+                          
+                          value:/^\d{10}$/,
+                          message:"should be of 10 Numbers"
+                        }
+                        })
+                      }
+                    />
+                    {errors.phone && errors.phone.type === 'required' &&(
+                  <p className="text-red-500">{errors.phone.message}</p>
+                )}
                   </div>
                 </div>
 
@@ -141,9 +278,17 @@ export default function CheckOut() {
                       type="text"
                       name="street-address"
                       id="street-address"
+                      // value={addressStreet}
                       autoComplete="street-address"
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    />
+                      {...register("street", {
+                        onChange:(e)=>handleStreetChange(e),
+                        required: "street is required",
+                      })}
+                   />
+                   {errors.street && (
+                  <p className="text-red-500">{errors.street.message}</p>
+                   )}
                   </div>
                 </div>
 
@@ -156,9 +301,18 @@ export default function CheckOut() {
                       type="text"
                       name="city"
                       id="city"
+                      // value={addressCity}
                       autoComplete="address-level2"
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    />
+                      {...register("city", {
+                        onChange: (e)=> handleCityChange(e),
+                        required: "city is required",
+                      })}
+                   />
+                   {errors.city && (
+                    
+                  <p className="text-red-500">{errors.city.message}</p>
+                   )}
                   </div>
                 </div>
 
@@ -169,39 +323,61 @@ export default function CheckOut() {
                   <div className="mt-2">
                     <input
                       type="text"
-                      name="region"
-                      id="region"
+                      name="state"
+                      // value={addressState}
+                      id="state"
                       autoComplete="address-level1"
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    />
+                      {...register("state", {
+                        required: "state is required",
+                        onChange : (e)=>handleStateChange(e),
+                      })}
+                   />
+                   {errors.state && (
+                  <p className="text-red-500">{errors.state.message}</p>
+                   )}
                   </div>
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label htmlFor="postal-code" className="block text-sm font-medium leading-6 text-gray-900">
+                  <label htmlFor="pinCode" className="block text-sm font-medium leading-6 text-gray-900">
                     ZIP / Postal code
                   </label>
                   <div className="mt-2">
                     <input
                       type="text"
-                      name="postal-code"
-                      id="postal-code"
-                      autoComplete="postal-code"
+                      name="pinCode"
+                      // value={addressPinCode}
+                      id="pinCode"  
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      {...register("pinCode", {
+                        onChange:(e)=> handlePinCodeChange(e),
+                        required: "pin is required",
+                        pattern:{
+                          
+                          value:/^\d{6}$/,
+                          message:"Pin should be of 6 Numbers"
+                        }
+                        })
+                      }
                     />
+                    {errors.pinCode && (
+                  <p className="text-red-500">{errors.pinCode.message}</p>
+                )}
                   </div>
                 </div>
                 
               </div>
             <div className="mt-6 flex items-center justify-end gap-x-6">
-                <button type="button" className="text-sm font-semibold leading-6 text-gray-900">
+                <button type="button" className="text-sm font-semibold leading-6 text-gray-900" onClick={()=>reset()}>
                   Cancel
                 </button>
                 <button
                   type="submit"
+                  disabled = {buttonController === 1}
                   className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
-                  Add Address
+                  {buttonController === 0? 'Add Address' : 'Update Address'}
                 </button>
           </div>
             </div>
@@ -210,12 +386,15 @@ export default function CheckOut() {
               <p className="mt-1 text-sm leading-6 text-gray-600">
                  Existing Address
               </p>
-              <ul role="list" className="divide-y divide-gray-100">
-      {address.map((addres) => (
-        <li key={addres.phone} className="flex px-5 justify-between gap-x-6 py-5">
+              
+              <ul role="list" className="divide-y scroll-smooth focus:scroll-auto divide-gray-100 max-h-[200px] overflow-y-auto">
+      {address ? address.map((addres,i) => (
+        <li  key={i} className="flex px-5 justify-between gap-x-6 py-5">
          
           <div className="flex min-w-0 gap-x-4">
           <input
+                        onClick={(addres)=>handleSelectAddress(address[i])}
+                        // onClick={()=>{setValue("phone", address[i]['phone'])}}
                         id="address"
                         name="address"
                         type="radio"
@@ -225,6 +404,7 @@ export default function CheckOut() {
               <p className="text-sm font-semibold leading-6 text-gray-900">{addres.name}</p>
               <p className="mt-1 truncate text-xs leading-5 text-gray-500">{addres.state}</p>
               <p className="mt-1 truncate text-xs leading-5 text-gray-500">{addres.pinCode}</p>
+              
 
 
             </div>
@@ -236,7 +416,7 @@ export default function CheckOut() {
             
           </div>
         </li>
-      ))}
+      )):null}
     </ul>
 
               <div className="mt-10 space-y-10">
@@ -291,8 +471,8 @@ export default function CheckOut() {
                   <li key={product.id} className="flex py-6">
                     <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                       <img
-                        src={product.imageSrc}
-                        alt={product.imageAlt}
+                        src={product.thumbnail}
+                        alt={product.title}
                         className="h-full w-full object-cover object-center"
                       />
                     </div>
@@ -302,7 +482,7 @@ export default function CheckOut() {
                         <div className="flex justify-between text-base font-medium text-gray-900">
                           <h3>
                             <a href={product.href}>
-                              {product.name}
+                              {product.title}
                             </a>
                           </h3>
                           <p className="ml-4">{product.price}</p>
@@ -326,6 +506,7 @@ export default function CheckOut() {
 
                         <div className="flex">
                           <button
+                           onClick={()=>handleRemoveButton(product.id)}
                             type="button"
                             className="font-medium text-indigo-600 hover:text-indigo-500"
                           >
@@ -343,7 +524,7 @@ export default function CheckOut() {
           <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
             <div className="flex justify-between text-base font-medium text-gray-900">
               <p>Subtotal</p>
-              <p>$262.00</p>
+              <p>${total}</p>
             </div>
             <p className="mt-0.5 text-sm text-gray-500">
               Shipping and taxes calculated at checkout.
