@@ -2,10 +2,10 @@ import React, { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useSelector, useDispatch } from "react-redux";
-import { increment, insertInCartsAsync, getItemsFromCartAsync, removeItemsFromCartAsync } from "./cartSlice";
+import { increment, insertInCartsAsync, getItemsFromCartAsync, getLength, removeItemsFromCartAsync } from "./cartSlice";
 import { Link, useParams } from "react-router-dom";
 import { selectLoggedInUser } from "../auth/authSlice";
-
+// import { getItemsFromCartAsync } from "./cartSlice";
 
 
 

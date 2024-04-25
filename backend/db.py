@@ -9,6 +9,8 @@ db = client['DummyProducts']
 collection = db['products']
 collection_customer = db['custombers']
 collection_cart = db['cart']
+collection_orders = db['orders']
+
 
 from pymongo.errors import DuplicateKeyError
 
@@ -174,4 +176,22 @@ def remove_product_in_cart(user_id, prod_id):
     {"$pull": {"cart": {"id": prod_id}}}
     )
     return get_product_from_cart(user_id)
+
+def empty_product_in_cart(user_id):
+    collection_cart.update_one({"user_id":user_id},{
+        "$set": { "cart": [] } })
+    
+def get_cart_length_from_db(user_id):
+    result = list(collection_cart.aggregate( [
+    {"$match": {"user_id":user_id}},  # Match the document(s) based on criteria
+    {"$project": {"array_length": {"$size": "$cart"}}}  # Calculate the length of the array field
+    ]))
+    return result[0]["array_length"]
+    
+
+def insert_order_in_DB(orders):
+    orders = orders.dict()
+    collection_orders.insert_one(orders)
+    empty_product_in_cart(orders['user_id'])
+    return 'done'
     
