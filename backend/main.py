@@ -13,9 +13,11 @@ from db import (
     get_address_from_db,
     insert_product_in_cart,
     remove_product_in_cart,
-    get_product_from_cart
+    get_product_from_cart,
+    get_cart_length_from_db,
+    insert_order_in_DB
 )
-from model import address_model, customer
+from model import address_model, customer, orders
 
 app = FastAPI()
 
@@ -120,6 +122,17 @@ async def inert_in_cart(user_id, product_id):
     product_id = int(product_id)
     response = remove_product_in_cart(user_id, product_id)
     return response
+
+# @app.get('/users/cart/length')
+# async def get_cart_length(user_id):
+#     pr
+
+@app.post('/user/order/insert')
+async def insert_order(order:orders):
+    print(order)
+    response = insert_order_in_DB(order)
+    return response
+
 
 
 

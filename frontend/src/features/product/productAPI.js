@@ -1,3 +1,4 @@
+import axios from "axios";
 
 
 
@@ -22,11 +23,25 @@ export  function fetchByCategories(categoriesList, page, brands) {
 }
 
 
-export function fetchProductById(id){
+// export function fetchProductById(id){
+//   return new Promise(async (resolve) => {
+//     console.log(id)
+//     const response = await fetch('http://localhost:3001/getProduct/'+id, {method: "GET"} )
+//     const data = await response.json()
+//     resolve({data})
+//   })
+// }
+
+
+export function fetchProductById(id) {
   return new Promise(async (resolve) => {
-    console.log(id)
-    const response = await fetch('http://localhost:3001/getProduct/'+id, {method: "GET"} )
-    const data = await response.json()
-    resolve({data})
-  })
+    try {
+      console.log(id);
+      const response = await axios.get(`http://localhost:3001/getProduct/${id}`);
+      resolve({ data: response.data });
+    } catch (error) {
+      console.error('Error fetching product by ID:', error);
+      resolve({ data: null });
+    }
+  });
 }

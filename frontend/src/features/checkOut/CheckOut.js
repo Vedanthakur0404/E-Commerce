@@ -3,10 +3,11 @@ import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useSelector, useDispatch } from "react-redux";
 import { increment, incrementAsync } from "./checkOutSlice";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { getItemsFromCartAsync, removeItemsFromCartAsync } from "../cart/cartSlice";
 import { useForm } from "react-hook-form";
 import { addAddressAsync, getAddressAsync } from "./checkOutSlice";
+import { insertOrdersAsync } from "../orders/ordersSlice";
 
 
 export default function CheckOut() {
@@ -19,11 +20,14 @@ export default function CheckOut() {
     formState: { errors },
     setValue,
   } = useForm();
+
+ 
   
   
   const dispatch = useDispatch();
   const user = useSelector((state) => state.customer.loggedInUser);
   const cart = useSelector((state) => state.cart.cart)
+  const cartSize = useSelector((state) => state.cart.size)
   const addressList = useSelector((state) => state.checkout.addressList)
   const [selectedAddress, setSelectedAddress] = useState(null)
   const [addressName, setAddressName] = useState('')
@@ -34,6 +38,18 @@ export default function CheckOut() {
   const [addressState, setAddressState] = useState('')
   const [addressPinCode, setAddressPinCode] = useState('')
   const [buttonController, setButtonController] = useState(0)
+  const navigate = useNavigate();
+
+  function handleOrder(){
+    console.log("Clicked pay orders")
+    console.log("address is ",selectedAddress)
+    console.log("cart is ",cart)
+    console.log ("user_id is ", user['id'])
+    dispatch(insertOrdersAsync({'user_id' : user['id'], 'address':selectedAddress, 'orders':cart}))
+    dispatch(getItemsFromCartAsync( user['id']))
+    navigate('/')
+  }
+
 
 
   useEffect(()=>{
@@ -46,6 +62,7 @@ export default function CheckOut() {
   }
 
   function handleSelectAddress(selectedAddress){
+    selectedAddress = { ...selectedAddress, user_id: user['id'] };
     setButtonController(1)
     console.log(selectedAddress)
     setSelectedAddress(selectedAddress)
@@ -369,7 +386,9 @@ export default function CheckOut() {
                 
               </div>
             <div className="mt-6 flex items-center justify-end gap-x-6">
-                <button type="button" className="text-sm font-semibold leading-6 text-gray-900" onClick={()=>reset()}>
+                <button type="button" className="text-sm font-semibold leading-6 text-gray-900" onClick={()=>{
+                  setButtonController(0)
+                  reset()}}>
                   Cancel
                 </button>
                 <button
@@ -393,7 +412,7 @@ export default function CheckOut() {
          
           <div className="flex min-w-0 gap-x-4">
           <input
-                        onClick={(addres)=>handleSelectAddress(address[i])}
+                        onClick={()=>handleSelectAddress(address[i])}
                         // onClick={()=>{setValue("phone", address[i]['phone'])}}
                         id="address"
                         name="address"
@@ -530,11 +549,11 @@ export default function CheckOut() {
               Shipping and taxes calculated at checkout.
             </p>
             <div className="mt-6">
-              <Link to='/pay'
+              <button onClick={() => handleOrder() }
                 className="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
               >
                 Pay and Order
-              </Link>
+              </button>
             </div>
             <div className="mt-6 flex justify-center text-center text-sm text-gray-500">
               <p>
